@@ -6,11 +6,23 @@ env:
   - secure: LDmZDv5hZcHdSTuOR/tpoo2INx4ZMKSLqLO9XaMWFP9Us2TUjJ9EroZW74ECiNB8QC/sk6QfX2JbEa5CJpZ4Nq4lbjZSYCpp+6MBKREw8rKTjafKNyMnV378fvl+G0JATJGf4L/iOeL1RHoSgfI8o1phHxk1NX2uKdWtAe8yrAJmRfkBPKtYfDYMZH3lzM3NbA2CGujcjzeT5uOH9qubOhlXKjTWsMnxgeoxn3xa9L6JZU0HE2AXyolsjVjTXUwWfU2+K/gZaUYk2BYeTjfCqEuIZHkdqczFNewJIut6wZXeQXRJgBGHedpPLtjnHYotNIeLaEM8Fk6iCME0GZZcQ9dLVFxCvY/gX+BAcY/BiJk8IX7K604hLqJplUNdDKCLT0scqxhMKet4VmRsHlYkzEUDyyzAX1dVHmRR7l18xJ8yDG3xB9utZXQ4OvFxMgIWLmWnyhEJiInna37PZ0ezEPJbX6L4RrZKqO88w17kh2sgshz/6MW7+xp7gePIuLiwEQR7HDRJm3mUYlrhi5DJ8aXKWbL4ny+zlJEM1DQMlEQKZhD6DEp7Ozw0IX67i6biwNiDCITm6rOQYnxDx4hZMndik+oPhTuh+GtpRKNi74y4e0m+v2IWnxZKUtScm+DojFESjmue9zJcGzDMeFHJSVfhDzsDvrSpNaLuZU4eeDc=
   - secure: g3o8yIyqaRAyb8NqP/NN4uVF3xVeqNazhzmOgKFvQEbPMq6zmJ9yhNkx2xDE0YHKWkk9+ZMWwXs96XLOczgorzvlK025ZbiROFcmddDnOCfbgQpryG03LGs5TEyQlWkFRrNnc3JmnEzH/RGvd56BW7vS2SnFJzQZ9/Sc+BuWwW6I2u5a1nno+O2AaVZoPMRsCthskKjPrnkEJxkyQ3lZTT85VFTCbOD2aQcdyqGIlsxehKQmiTWvwAB4fOPVEHslN3/EqJSsIS6BufNtzh7sCEe6iy4J1gXFKwyGgO4gT6hyUNNuuLsFopB2V5/tnH/lGzy5413eTNMwBCevbYlIiKOB336xGTGqFwxG9j6NVgv28cOMMUlazyPiu7sreQeySMEzT52UtT5agwBkoTKFQZvPtYtSmJBiknFk6EnvaC5RLeOJ+Dup1soWj0Sm6kmW44dgx6MX7ogMqMPBP42X2rj57aeY/TwsHKM79sNDcOhsUeTncqucBsSfxm1FQ9KXsngF/ug2AAuFgjAy1MkcZQWgY/MfkBEMhYuNNu56Ll68GpJQSEeCKpdaCS1gdMQ34JkDCK8QgjkrGUBNCGkco02MIP3XmcVjV1BkhJh3v3HPZjDMevVIYFs+EWXBhXuZe5k1d/1sSqZBdqa5TfBJSI3/D/EQeBp1tPjn0gs2u+s=
 script:
-- php -l s3copy.php
-- php -l inc/S3-class.php
-- php -l templates/settings.php
+- "./ci-utils/phpcheck && ./ci-utils/pushplug.sh"
+before_deploy:
+- rm -rf $(echo ${TRAVIS_REPO_SLUG} | cut -d/ -f1)
+- assets=$(echo *)
+- mkdir -p ${TRAVIS_REPO_SLUG}
+- cp -al $assets ${TRAVIS_REPO_SLUG}
+- if [ -n "$TRAVIS_TAG" ] ; then zip -r ${TRAVIS_REPO_SLUG}.$TRAVIS_TAG.zip ${TRAVIS_REPO_SLUG}
+  && mv ${TRAVIS_REPO_SLUG}.$TRAVIS_TAG.zip . ; fi
+- rm -rf ${TRAVIS_REPO_SLUG}
 deploy:
-  provider: script
-  script: ./ci-utils/pushplug.sh
+  provider: releases
+  file_glob: true
+  api_key:
+    secure: s1CIMzvgyLJ4CC5DC4ktnA9D9WrRd6xV960A3o4zH2ulhKo8D667v82P7VlXaII3jMAESKRf25lGi3vG1L8e7Z+umhT71HxFFiKpGDcwL1gEdIo7cM3DSOG0G9neT12PuVQNi6SPHCQYQ9pGqYUez0ikY642mjFmRksvdIqlFxeULDJ5pjDeWkX5S2Nl+QTA2eEv7N5kE+KSmyJA2TujInvNgRrn4fCfRfj3JWz0te2A8UtD1OeMeTATp5QOk5I+7xZr8zZIdB4kQJfAbiScczxBDQZ3sM0jDm9JnJI2gcfQTnR/l4/w9u0ih/S6aoK966Snz7kyPlxFGb5iJHkST8fi2XoF3TIRJyscPN75HJn6BfffWQPzvE9Ct9s67SYGTkftt68/Sofe8NZzsIUw9K6IkyK+yOJPfrmRIuL8dFH1Jtj5DxPAm5ijEVYFnVWJy8cW876f9sd2mtnu2a6GQV/y6AZfQ0L3pytP/Tz7DF80P3ObwNqjrTWCV3AFwo2gsWx+Nt+WS5riKFszvapOxinoFB2EN4iY9njdVlSriSPMcEP6W52+MhnC9WRj+BQPu8swVWrd8NI2knJjuug4QG4VPtybFrsuyQIj+45Rmthl3VRzthQx17oQLeeuTgh7yKbi0vVxivoRnmZzWhln2N8CRz7qUDQz9oqb6hsxWts=
+  file: "*.zip"
   on:
-    all_branches: true
+    repo: iliu-net/S3Copy
+    tags: true
+    branch: master
+  

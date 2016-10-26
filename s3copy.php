@@ -276,19 +276,3 @@ if (class_exists('S3_Copy')) {
   $s3copy = new S3_Copy();
 }
 
-function test_shortcode($atts) {
-  $txt = '<hr/><pre>';
-  $txt .= esc_html(print_r([
-/*    home_url(),
-    get_home_path(),
-    site_url(),
-    admin_url(),
-    content_url(), */
-    wp_upload_dir(),
-  ],true));
-
-  $txt .= '</pre>';
-  return $txt;
-}
-add_shortcode('test_shortcode', 'test_shortcode');
-
