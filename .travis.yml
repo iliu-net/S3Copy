@@ -8,13 +8,7 @@ env:
 script:
 - "./ci-utils/phpcheck && ./ci-utils/pushplug.sh"
 before_deploy:
-- rm -rf $(echo ${TRAVIS_REPO_SLUG} | cut -d/ -f1)
-- assets=$(echo *)
-- mkdir -p ${TRAVIS_REPO_SLUG}
-- cp -al $assets ${TRAVIS_REPO_SLUG}
-- if [ -n "$TRAVIS_TAG" ] ; then zip -r ${TRAVIS_REPO_SLUG}.$TRAVIS_TAG.zip ${TRAVIS_REPO_SLUG}
-  && mv ${TRAVIS_REPO_SLUG}.$TRAVIS_TAG.zip . ; fi
-- rm -rf ${TRAVIS_REPO_SLUG}
+- ./ci-utils/mkplug.sh wp
 deploy:
   provider: releases
   file_glob: true

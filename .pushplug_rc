@@ -6,7 +6,7 @@ case "$TRAVIS_BRANCH" in
   master)
     OPENSHIFT_APP="wpdev1"
     ;;
-  dev)
+  dev-*)
     OPENSHIFT_APP="wpdev1"
     ;;
   *)
