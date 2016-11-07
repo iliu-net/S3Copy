@@ -36,6 +36,16 @@ if (!class_exists('S3_Copy')) {
       //add_action('image_make_intermediate_size', [$this, 'upload_intermediate_sizes' ] );
       add_action('admin_notices', [ $this, 'warnings'] );
       add_filter('content_save_pre', [ $this, 'fix_attachment_url'] );
+      
+      if (is_multisite()) add_action('admin_bar_menu',[$this,'show_site_id'],50);
+    }
+    public function show_site_id($admin_bar) {
+      $sid = get_current_blog_id();
+      $admin_bar->add_menu([
+	'id' => 'site-id',
+	'title' => 'SID:'.$sid,
+	'href' => '#',
+      ]);
     }
     public static function activate() {
     }
@@ -54,16 +64,18 @@ if (!class_exists('S3_Copy')) {
     }
     public function warnings() {
       $warning = '';
-      if (!get_option('S3_END_POINT')) $warning .= '<strong>Warning:</strong> You have not defined your S3 End Pointkey<br />';
-      if (!get_option('S3_ACCESS_KEY')) $warning .= '<strong>Warning:</strong> You have not added your S3 Access key<br />';
-      if (!get_option('S3_SECRET_KEY')) $warning .= '<strong>Warning:</strong> You have not added your S3 Secret key<br />';
-      if (!get_option('S3_BUCKET_NAME')) $warning .= '<strong>Warning:</strong> You have not added your S3 bucket name<br />';
-      if (!get_option('S3_URL_PATH')) $warning .= '<strong>Warning:</strong> You have not added your S3 URL path<br />';
-      // Add warning wrapper (makes it appear red and important in the WP admin panel)
-      if ( '' != $warning ) {
-	$warning = '<div class="error"><p>' . $warning;
-	$warning .= '</p></div>';
+      if (get_option('S3_URL_PATH')) {
+	if (!get_option('S3_END_POINT')) $warning .= '<strong>Warning:</strong> You have not defined your S3 End Point<br />';
       }
+      if (get_option('S3_END_POINT')) {
+	if (!get_option('S3_ACCESS_KEY')) $warning .= '<strong>Warning:</strong> You have not added your S3 Access key<br />';
+	if (!get_option('S3_SECRET_KEY')) $warning .= '<strong>Warning:</strong> You have not added your S3 Secret key<br />';
+	if (!get_option('S3_BUCKET_NAME')) $warning .= '<strong>Warning:</strong> You have not added your S3 bucket name<br />';
+      }
+      if ( '' == $warning ) return;
+      // Add warning wrapper (makes it appear red and important in the WP admin panel)
+      $warning = '<div class="error"><p>' . $warning;
+      $warning .= '</p></div>';
       echo $warning;
     }   
     /**
@@ -93,6 +105,7 @@ if (!class_exists('S3_Copy')) {
      */
     public function upload_attachment( $post_id ) {
       if (!preg_match('/^image\//',get_post_mime_type($post_id))) return; // Filter out non-images
+      if (!get_option('S3_END_POINT')) return; // If no S3 End-point defined, skip this!
 
       $file_dir = get_attached_file( $post_id ); // Grab file path
       $file = $this->_get_file_name( $file_dir ); // Grab array with file path and name
@@ -115,6 +128,7 @@ if (!class_exists('S3_Copy')) {
      * @param string $file_path The path to the file
      */
     public function upload_intermediate_sizes( $file_path ) {
+      if (!get_option('S3_END_POINT')) return; // If no S3 End-point defined, skip this!
       $file = $this->_get_file_name( $file_path );
       $this->_send_to_s3( $file['path'], $file['name'] );
       $this->mark_as_sent($file);
@@ -188,7 +202,8 @@ if (!class_exists('S3_Copy')) {
       $s3->putObjectFile( $file_path, get_option('S3_BUCKET_NAME'), $file_name, S3::ACL_PUBLIC_READ );
     }
    function fix_attachment_url($inp) {
-      if (!preg_match('/<img src/',$inp)) return $inp;
+      if (!preg_match('/<img\s+/',$inp)) return $inp;
+      if (!get_option('S3_URL_PATH')) return $inp;
 
       //$cutter = '<!----- CUT HERE ------->';
       //if (($i=strpos($inp,$cutter)) !== FALSE) {
@@ -204,7 +219,7 @@ if (!class_exists('S3_Copy')) {
 
       $out = '';
       $off = 0;
-      while (preg_match('/<img (src.*)>/',$inp, $mv, PREG_OFFSET_CAPTURE, $off)) {
+      while (preg_match('/<img\s+>/',$inp, $mv, PREG_OFFSET_CAPTURE, $off)) {
 	$out .= substr($inp,$off, $mv[0][1]-$off);
 	$off = $mv[0][1]+strlen($mv[0][0]);
 	

@@ -29,7 +29,12 @@ It will also modify `img` tags so that photos are served from the S3 cloud.
 
 ## Changelog
 
-- 1.0 (planned)  
+- 1.1: 
+  - Show the site id (if multisite).  Useful when browsing S3 bucket directly.
+  - Make it let's obnoxious if the Plugin is enabled but not configured.
+  - Added more info on how to configure the thing.
+  - Better <img> tag detection
+- 1.0:
   Initial release.
 
 ### Credits

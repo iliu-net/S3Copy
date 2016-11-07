@@ -4,10 +4,10 @@
 #
 case "$TRAVIS_BRANCH" in
   master)
-    OPENSHIFT_APP="wpdev1"
+    OPENSHIFT_APP="dev3"
     ;;
-  dev-*)
-    OPENSHIFT_APP="wpdev1"
+  dev*)
+    OPENSHIFT_APP="dev3"
     ;;
   *)
     # Disable deployments unless explicitly defined...
