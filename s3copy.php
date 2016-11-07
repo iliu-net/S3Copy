@@ -3,7 +3,7 @@
 Plugin Name: S3Copy
 Plugin URI: http://nowhere/
 Description: Backup media to an S3 account.  Based on defunct's Photocopy plugin by Ryan Hellyer <ryan@pixopoint.com>
-Version: 1.0
+Version: 1.1
 Author: Alejandro Liu
 Author URI: http://0ink.net
 License: GPL2

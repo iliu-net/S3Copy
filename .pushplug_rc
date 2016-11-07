@@ -11,7 +11,9 @@ case "$TRAVIS_BRANCH" in
     ;;
   *)
     # Disable deployments unless explicitly defined...
-    echo "No APP configured"
-    exit 0
+    if [ -z "$OPENSHIFT_APP" ] ; then
+      echo "No APP configured"
+      exit 0
+    fi
     ;;
 esac
