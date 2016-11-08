@@ -37,6 +37,9 @@ if (!class_exists('S3_Copy')) {
       add_action('admin_notices', [ $this, 'warnings'] );
       add_filter('content_save_pre', [ $this, 'fix_attachment_url'] );
       
+      add_filter('wp_get_attachment_url',[$this,'mangle_attchment_url']);
+      add_filter('wp_get_attachment_image_src',[$this,'mangle_attachment_image_src']);
+      
       if (is_multisite()) add_action('admin_bar_menu',[$this,'show_site_id'],50);
     }
     public function show_site_id($admin_bar) {
@@ -46,6 +49,33 @@ if (!class_exists('S3_Copy')) {
 	'title' => 'SID:'.$sid,
 	'href' => '#',
       ]);
+    }
+    /**
+     * Get attachment url
+     *
+     * @param string $url
+     * @param int    $post_id
+     *
+     * @return bool|mixed|void|WP_Error
+     */  
+    public function mangle_attachment_url($url,$postid) {
+      return $url.'?mangle_postid='.$postid;
+    }
+    /**
+     * Maybe encode URLs for images that represent an attachment
+     *
+     * @param array|bool   $image
+     * @param int          $attachment_id
+     * @param string|array $size
+     * @param bool         $icon
+     *
+     * @return array
+     */
+    public function mangle_attachment_image_src($image,$attachment_id,$size,$icon) {
+      if (isset($image[0])) {
+        $image[0] .= '?mangle_imsgsrc_postid='.$attachment_id;
+      }
+      return $image;
     }
     public static function activate() {
     }
